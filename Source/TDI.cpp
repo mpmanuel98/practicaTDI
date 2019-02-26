@@ -14,16 +14,17 @@ int main(int argc, char **argv)
 
 	double seno, coseno;
 	angulo = 90;
-	coseno = cos(angulo);
-	seno = sin(angulo);
+	coseno = cos((angulo * 2 * PI) / 360);
+	seno = sin((angulo * 2 * PI) / 360);
 
-	long filaCentro = imagenIN.RowN() / 2;
-	long columnaCentro = imagenIN.ColN() / 2;
+	long n2 = imagenIN.RowN() / 2;
+	long m2 = imagenIN.ColN() / 2;
+	printf("n2 = %ld \t m2 = %ld \n", n2, m2);
 
-	//long x[] = { 0, imagenIN.LastRow(), 0, imagenIN.LastRow() };
-	//long y[] = { 0, 0, imagenIN.LastCol(), imagenIN.LastCol() };
-	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
-	long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
+	long x[] = { 0, imagenIN.LastRow() - 1, 0, imagenIN.LastRow() - 1 };
+	long y[] = { 0, 0, imagenIN.LastCol() - 1, imagenIN.LastCol() - 1 };
+	//long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
+	//long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
 
 	long p [4];
 	long q [4];
@@ -31,15 +32,16 @@ int main(int argc, char **argv)
 	long xp, xr, yp, yr;
 
 	for (i = 0; i < 4; i++) {
-		xp = x[i] - filaCentro;
-		yp = y[i] - columnaCentro;
+		printf("[_________________________________] x[%d] = %ld \t y[%d] = %ld \n", i, x[i], i, y[i]);
+		xp = x[i] - n2;
+		yp = y[i] - m2;
 		xr = xp * coseno + yp * seno;
 		yr = -xp * seno + yp * coseno;
 
-		p[i] = xr + filaCentro;
-		q[i] = yr + columnaCentro;
+		p[i] = xr + n2;
+		q[i] = yr + m2;
 
-		printf("p[i] = %ld \t q[i] = %ld \n", p[i], q[i]);
+		printf("p[%d] = %ld \t q[%d] = %ld \n", i, p[i], i, q[i]);
 	}
 
 	long p1 = LONG_MAX;
@@ -53,40 +55,40 @@ int main(int argc, char **argv)
 		if (q[i] < q1) q1 = q[i];
 		if (q[i] > q2) q2 = q[i];
 	}
-	printf("%ld - %ld - %ld - %ld\n", p1, p2, q1, q2);
+	printf("p1: %ld p2: %ld q1: %ld q2: %ld\n", p1, p2, q1, q2);
 
 	int filasNewImag, columnasNewImag;
 	filasNewImag = p2 - p1 + 1;
 	columnasNewImag = q2 - q1 + 1;
 	printf("Filas: %ld | Columnas: %ld \n", filasNewImag, columnasNewImag);
 
-	C_Image imagenOUT = C_Image(0, filasNewImag, 0, columnasNewImag, 0.0);
+	C_Image imagenOUT = C_Image(0, filasNewImag - 1, 0, columnasNewImag - 1, 0.0);
 
 	long sx, sy;
-	sx = p1 + filaCentro;
-	sy = q1 + columnaCentro;
+	sx = p1 + n2;
+	sy = q1 + m2;
 
 	long newX, newY;
 
-	for (j = imagenIN.FirstCol(); j < imagenIN.LastCol(); j++) {
-		yp = j - columnaCentro;
-		for (i = imagenIN.FirstRow(); i < imagenIN.LastRow(); i++) {
-			xp = i - filaCentro;
+	for (j = 0; j < (imagenIN.LastCol() - imagenIN.FirstCol()); j++) {
+		yp = j - m2;
+		for (i = 0; i < (imagenIN.LastRow() - imagenIN.FirstRow()); i++) {
+			xp = i - n2;
 			xr = xp * coseno + yp * seno;
 			yr = -xp * seno + yp * coseno;
 
 			newX = xr + sx;
 			newY = yr + sy;
-
+			printf("newX: %ld | newY: %ld \n", newX, newY);
 			imagenOUT(newX, newY) = imagenIN(i, j);
 		}
 	}
 
 	/*
-	for (j = 0; j < columnasNewImag; j++) {
-		yp = j - columnaCentro;
-		for (i = 0; i < filasNewImag; i++) {
-			xp = i - filaCentro;
+	for (j = imagenIN.FirstCol(); j < imagenIN.LastCol(); j++) {
+		yp = j - m2;
+		for (i = imagenIN.FirstRow(); i < imagenIN.LastRow(); i++) {
+			xp = i - n2;
 			xr = xp * coseno + yp * seno;
 			yr = -xp * seno + yp * coseno;
 
@@ -98,9 +100,23 @@ int main(int argc, char **argv)
 	}
 	*/
 
+	/*
+	for (j = 0; j < columnasNewImag; j++) {
+		yp = j - m2;
+		for (i = 0; i < filasNewImag; i++) {
+			xp = i - n2;
+			xr = xp * coseno + yp * seno;
+			yr = -xp * seno + yp * coseno;
 
+			newX = xr + sx;
+			newY = yr + sy;
 
+			imagenOUT(newX, newY) = imagenIN(i, j);
+		}
+	}
+	*/
+	   
 	imagenOUT.palette = imagenIN.palette;
-	imagenOUT.WriteBMP("Hercules_GrisMOD.bmp");
+	imagenOUT.WriteBMP("Hercules_GrisMOD1.bmp");
 	return 0;
 }
