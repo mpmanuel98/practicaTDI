@@ -13,14 +13,18 @@ int main(int argc, char **argv)
 	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
 	double seno, coseno;
-	angulo = 0;
+	angulo = 90;
 	coseno = cos(angulo);
 	seno = sin(angulo);
 
 	long filaCentro = imagenIN.RowN() / 2;
 	long columnaCentro = imagenIN.ColN() / 2;
-	long x[] = { 0, imagenIN.LastRow(), 0, imagenIN.LastRow() };
-	long y[] = { 0, 0, imagenIN.LastCol(), imagenIN.LastCol() };
+
+	//long x[] = { 0, imagenIN.LastRow(), 0, imagenIN.LastRow() };
+	//long y[] = { 0, 0, imagenIN.LastCol(), imagenIN.LastCol() };
+	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
+	long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
+
 	long p [4];
 	long q [4];
 
@@ -35,10 +39,13 @@ int main(int argc, char **argv)
 		p[i] = xr + filaCentro;
 		q[i] = yr + columnaCentro;
 
-		printf("%ld - %ld \n", p[i], q[i]);
+		printf("p[i] = %ld \t q[i] = %ld \n", p[i], q[i]);
 	}
 
-	long p1 = 9999999999, p2 = -9999999999, q1 = 9999999999, q2 = -9999999999;
+	long p1 = LONG_MAX;
+	long q1 = LONG_MAX;
+	long p2 = LONG_MIN;
+	long q2 = LONG_MIN;
 
 	for (i = 0; i < 4; i++) {
 		if (p[i] < p1) p1 = p[i];
@@ -51,7 +58,7 @@ int main(int argc, char **argv)
 	int filasNewImag, columnasNewImag;
 	filasNewImag = p2 - p1 + 1;
 	columnasNewImag = q2 - q1 + 1;
-	printf("%ld - %ld \n", filasNewImag, columnasNewImag);
+	printf("Filas: %ld | Columnas: %ld \n", filasNewImag, columnasNewImag);
 
 	C_Image imagenOUT = C_Image(0, filasNewImag, 0, columnasNewImag, 0.0);
 
@@ -61,6 +68,21 @@ int main(int argc, char **argv)
 
 	long newX, newY;
 
+	for (j = imagenIN.FirstCol(); j < imagenIN.LastCol(); j++) {
+		yp = j - columnaCentro;
+		for (i = imagenIN.FirstRow(); i < imagenIN.LastRow(); i++) {
+			xp = i - filaCentro;
+			xr = xp * coseno + yp * seno;
+			yr = -xp * seno + yp * coseno;
+
+			newX = xr + sx;
+			newY = yr + sy;
+
+			imagenOUT(newX, newY) = imagenIN(i, j);
+		}
+	}
+
+	/*
 	for (j = 0; j < columnasNewImag; j++) {
 		yp = j - columnaCentro;
 		for (i = 0; i < filasNewImag; i++) {
@@ -74,6 +96,8 @@ int main(int argc, char **argv)
 			imagenOUT(newX, newY) = imagenIN(i, j);
 		}
 	}
+	*/
+
 
 
 	imagenOUT.palette = imagenIN.palette;
