@@ -13,7 +13,8 @@ int main(int argc, char **argv)
 	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
 	double seno, coseno;
-	angulo = 90;
+	angulo = 25;
+
 	coseno = cos((angulo * 2 * PI) / 360);
 	seno = sin((angulo * 2 * PI) / 360);
 
@@ -21,10 +22,10 @@ int main(int argc, char **argv)
 	long m2 = imagenIN.ColN() / 2;
 	printf("n2 = %ld \t m2 = %ld \n", n2, m2);
 
-	long x[] = { 0, imagenIN.LastRow() - 1, 0, imagenIN.LastRow() - 1 };
-	long y[] = { 0, 0, imagenIN.LastCol() - 1, imagenIN.LastCol() - 1 };
-	//long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
-	//long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
+	//long x[] = { 0, imagenIN.LastRow() - 1, 0, imagenIN.LastRow() - 1 };
+	//long y[] = { 0, 0, imagenIN.LastCol() - 1, imagenIN.LastCol() - 1 };
+	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
+	long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
 
 	long p [4];
 	long q [4];
@@ -62,17 +63,20 @@ int main(int argc, char **argv)
 	columnasNewImag = q2 - q1 + 1;
 	printf("Filas: %ld | Columnas: %ld \n", filasNewImag, columnasNewImag);
 
-	C_Image imagenOUT = C_Image(0, filasNewImag - 1, 0, columnasNewImag - 1, 0.0);
+	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
+
+	long newn2 = imagenOUT.RowN() / 2;
+	long newm2 = imagenOUT.ColN() / 2;
 
 	long sx, sy;
-	sx = p1 + n2;
-	sy = q1 + m2;
+	sx = p1 + newn2;
+	sy = q1 + newm2;
 
 	long newX, newY;
 
-	for (j = 0; j < (imagenIN.LastCol() - imagenIN.FirstCol()); j++) {
+	for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
 		yp = j - m2;
-		for (i = 0; i < (imagenIN.LastRow() - imagenIN.FirstRow()); i++) {
+		for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
 			xp = i - n2;
 			xr = xp * coseno + yp * seno;
 			yr = -xp * seno + yp * coseno;
@@ -100,21 +104,6 @@ int main(int argc, char **argv)
 	}
 	*/
 
-	/*
-	for (j = 0; j < columnasNewImag; j++) {
-		yp = j - m2;
-		for (i = 0; i < filasNewImag; i++) {
-			xp = i - n2;
-			xr = xp * coseno + yp * seno;
-			yr = -xp * seno + yp * coseno;
-
-			newX = xr + sx;
-			newY = yr + sy;
-
-			imagenOUT(newX, newY) = imagenIN(i, j);
-		}
-	}
-	*/
 	   
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("Hercules_GrisMOD1.bmp");
