@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 	C_Image imagenIN;
 	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
-	long angulo = 0;
+	long angulo = 60;
 
 	//Calculamos el seno y coseno del angulo a rotar (en radianes)
 	double st, ct;
@@ -23,10 +23,9 @@ int main(int argc, char **argv)
 	long N = imagenIN.RowN();
 	long M = imagenIN.ColN();
 
-	//Mitad de fila y columna
+	//Mitad de fila y columna de la matriz original
 	long N2 = N / 2;
 	long M2 = M / 2;
-	printf("n2 = %ld \t m2 = %ld \n", N2, M2);
 
 	//Esquinas de la matriz original
 	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
@@ -79,8 +78,8 @@ int main(int argc, char **argv)
 	long Np2 = imagenOUT.RowN() / 2;
 	long Mp2 = imagenOUT.ColN() / 2;
 	printf("Filas: %ld | Columnas: %ld \n", Np2, Mp2);
+
 	
-	/*
 	//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION
 
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
@@ -105,11 +104,11 @@ int main(int argc, char **argv)
 			imagenOUT(newX, newY) = imagenIN(i, j);
 		}
 	}
-	*/
-	
+
+	/*
 	//ALGORITMO DE INTERPOLACION LINEAL INVERSA PARA LA ROTACION
 	long xx, yy, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4, ip, jp, i1, j1;
-	long ys, yc;
+	double ys, yc;
 
 	for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
 		yp = j - Mp2;
@@ -148,7 +147,7 @@ int main(int argc, char **argv)
 			imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(i1, jp) + f3 * imagenIN(ip, j1) + f4 * imagenIN(i1, j1);
 		}
 	}
-
+	*/
 	 
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("Hercules_GrisMOD1.bmp");
