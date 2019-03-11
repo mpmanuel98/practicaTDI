@@ -8,19 +8,23 @@
 
 int main(int argc, char **argv)
 {
-	int i, j, angulo;
+	long i, j, angulo;
 	C_Image imagenIN;
 	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
-	double seno, coseno;
-	angulo = 25;
+	double st, ct;
+	angulo = 0;
 
-	coseno = cos((angulo * 2 * PI) / 360);
-	seno = sin((angulo * 2 * PI) / 360);
+	//Calculamos el seno y coseno del angulo (en radianes)
+	ct = cos((angulo * 2 * PI) / 360);
+	st = sin((angulo * 2 * PI) / 360);
 
-	long n2 = imagenIN.RowN() / 2;
-	long m2 = imagenIN.ColN() / 2;
-	printf("n2 = %ld \t m2 = %ld \n", n2, m2);
+	long N = imagenIN.RowN();
+	long M = imagenIN.ColN();
+
+	double N2 = N / 2;
+	double M2 = M / 2;
+	//printf("n2 = %ld \t m2 = %ld \n", N2, M2);
 
 	//long x[] = { 0, imagenIN.LastRow() - 1, 0, imagenIN.LastRow() - 1 };
 	//long y[] = { 0, 0, imagenIN.LastCol() - 1, imagenIN.LastCol() - 1 };
@@ -30,19 +34,19 @@ int main(int argc, char **argv)
 	long p [4];
 	long q [4];
 
-	long xp, xr, yp, yr;
+	double xp, xr, yp, yr;
 
 	for (i = 0; i < 4; i++) {
-		printf("[_________________________________] x[%d] = %ld \t y[%d] = %ld \n", i, x[i], i, y[i]);
-		xp = x[i] - n2;
-		yp = y[i] - m2;
-		xr = xp * coseno + yp * seno;
-		yr = -xp * seno + yp * coseno;
+		//printf("[_________________________________] x[%d] = %ld \t y[%d] = %ld \n", i, x[i], i, y[i]);
+		xp = x[i] - N2;
+		yp = y[i] - M2;
+		xr = xp * ct + yp * st;
+		yr = -xp * st + yp * ct;
 
-		p[i] = xr + n2;
-		q[i] = yr + m2;
+		p[i] = xr + N2;
+		q[i] = yr + M2;
 
-		printf("p[%d] = %ld \t q[%d] = %ld \n", i, p[i], i, q[i]);
+		//printf("p[%d] = %ld \t q[%d] = %ld \n", i, p[i], i, q[i]);
 	}
 
 	long p1 = LONG_MAX;
@@ -56,56 +60,90 @@ int main(int argc, char **argv)
 		if (q[i] < q1) q1 = q[i];
 		if (q[i] > q2) q2 = q[i];
 	}
-	printf("p1: %ld p2: %ld q1: %ld q2: %ld\n", p1, p2, q1, q2);
+	//printf("p1: %ld p2: %ld q1: %ld q2: %ld\n", p1, p2, q1, q2);
 
-	int filasNewImag, columnasNewImag;
-	filasNewImag = p2 - p1 + 1;
-	columnasNewImag = q2 - q1 + 1;
-	printf("Filas: %ld | Columnas: %ld \n", filasNewImag, columnasNewImag);
+	//Filas y columnas de la nueva imagen
+	long Np, Mp;
+	Np = p2 - p1 + 1;
+	Mp = q2 - q1 + 1;
+	//printf("Filas: %ld | Columnas: %ld \n", Np, Mp);
 
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
 
-	long newn2 = imagenOUT.RowN() / 2;
-	long newm2 = imagenOUT.ColN() / 2;
+	//La mitad de la filas y columnas de la nueva imagen
+	double Np2 = imagenOUT.RowN() / 2;
+	double Mp2 = imagenOUT.ColN() / 2;
 
-	long sx, sy;
-	sx = p1 + newn2;
-	sy = q1 + newm2;
-
-	long newX, newY;
+	double sx, sy;
+	sx = p1 + Np2;
+	sy = q1 + Mp2;
+	
+	double ys, yc, xx, yy, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4;
+	long ip, jp, i1, j1;
 
 	for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
-		yp = j - m2;
+		yp = j - Mp2;
+		ys = -st * yp;
+		yc = ct * yp;
 		for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
-			xp = i - n2;
-			xr = xp * coseno + yp * seno;
-			yr = -xp * seno + yp * coseno;
+			xp = i - Np2;
+			xr = xp * ct + ys;
+			yr = xp * st + yc;
 
-			newX = xr + sx;
-			newY = yr + sy;
-			printf("newX: %ld | newY: %ld \n", newX, newY);
-			imagenOUT(newX, newY) = imagenIN(i, j);
+			xx = xr + Np2;
+			yy = yr + Mp2;
+
+			ip = (long)x;
+			jp = (long)y;
+
+			i1 = ip + 1;
+			j1 = jp + 1;
+			
+			c1 = xx - ip;
+			d1 = yy - jp;
+
+			a1 = 1 - c1;
+			b1 = c1;
+
+			a2 = 1 - d1;
+			b2 = d1;
+
+			f1 = a1 * a2;
+			f2 = b1 * a2;
+			f3 = a1 * b2;
+			f4 = a2 * b2;
+
+
+
+
+			//printf("newX: %ld | newY: %ld \n", newX, newY);
+
+			imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(i1, jp) + f3 * imagenIN(ip, j1) + f4 * imagenIN(i1, j1);
 		}
 	}
 
 	/*
-	for (j = imagenIN.FirstCol(); j < imagenIN.LastCol(); j++) {
-		yp = j - m2;
-		for (i = imagenIN.FirstRow(); i < imagenIN.LastRow(); i++) {
-			xp = i - n2;
-			xr = xp * coseno + yp * seno;
-			yr = -xp * seno + yp * coseno;
+	// IMPLEMENTACION DIRECTA
+		for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
+		yp = j - M2;
+		for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
+			xp = i - N2;
+			xr = xp * ct + yp * st;
+			yr = -xp * st + yp * ct;
 
 			newX = xr + sx;
 			newY = yr + sy;
+			//printf("newX: %ld | newY: %ld \n", newX, newY);
 
 			imagenOUT(newX, newY) = imagenIN(i, j);
 		}
 	}
 	*/
-
 	   
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("Hercules_GrisMOD1.bmp");
+
+	/*	Hay que hacerlo tb con mas algoritmos como el de los k vecinos mas cercanos y el de busqueda binaria / cuadratica	*/	
+
 	return 0;
 }
