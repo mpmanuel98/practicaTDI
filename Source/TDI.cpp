@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
 	long i, j;
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Hercules_GrisCuad.bmp");
+	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
 	long angulo = 90;
 
@@ -85,6 +85,7 @@ int main(int argc, char **argv)
 	double Np2 = Np / 2;
 	double Mp2 = Mp / 2;
 
+	/*
 	//ALGORITMO DE INTERPOLACION LINEAL INVERSA PARA LA ROTACION
 	long c1, d1, a1, b1, a2, b2, ip, jp, i1, j1;
 	double x2, y2, ys, yc, f1, f2, f3, f4;
@@ -122,30 +123,31 @@ int main(int argc, char **argv)
 			//imagenOUT(i, j) = imagenIN(ip, jp);
 		}
 	}
+	*/
 	
-
 	/*
 	//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION
+	//Valores centrales en la matriz original (corrimientos acumulados)
+	long sxIN = imagenIN.FirstRow() + N2;
+	long syIN = imagenIN.FirstCol() + M2;
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
-	long sx = imagenIN.FirstRow() + N2;
-	long sy = imagenIN.FirstCol() + M2;
+	long sxOUT = imagenOUT.FirstRow() + Np2;
+	long syOUT = imagenOUT.FirstCol() + Mp2;
 
 	long ip, jp;
 	for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
 		printf("j: %ld, yp: %ld\n", j, yp);
-		yp = j - Mp2;
+		yp = j - syOUT;
 		for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
-			xp = i - Np2;
-
+			xp = i - sxOUT;
 			
-			xr = ct * yp - st * xp;
-			yr = st * yp + ct * xp;
+			xr = ct * xp + st * yp;
+			yr = -st * xp + ct * yp;
 
-			ip = xr + sx;
-			jp = yr + sy;
-
+			ip = xr + sxIN;
+			jp = yr + syIN;
 			
-			if ((xr >= imagenIN.FirstRow()) && (yr >= imagenIN.FirstCol()) && (xr <= imagenIN.LastRow()) && (yr <= imagenIN.LastCol())) {
+			if ((ip >= imagenIN.FirstRow()) && (jp >= imagenIN.FirstCol()) && (ip <= imagenIN.LastRow()) && (jp <= imagenIN.LastCol())) {
 				imagenOUT(i, j) = imagenIN(ip, jp);
 			}
 			else {
@@ -156,29 +158,31 @@ int main(int argc, char **argv)
 		}
 	}
 	*/
-
-	/*
+	
 	//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION
-
+	//Valores centrales en la matriz original (corrimientos acumulados)
+	long sxIN = imagenIN.FirstRow() + N2;
+	long syIN = imagenIN.FirstCol() + M2;
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
-	long sx = imagenOUT.FirstRow() + Np2;
-	long sy = imagenOUT.FirstCol() + Mp2;
+	long sxOUT = imagenOUT.FirstRow() + Np2;
+	long syOUT = imagenOUT.FirstCol() + Mp2;
 
 	long ip, jp;
 	for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
-		yp = j - M2;
+		yp = j - syIN;
 		for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
-			xp = i - N2;
+			xp = i - sxIN;
+
 			xr = xp * ct + yp * st;
 			yr = -xp * st + yp * ct;
 
-			ip = xr + sx;
-			jp = yr + sy;
+			ip = xr + sxOUT;
+			jp = yr + syOUT;
 
 			imagenOUT(ip, jp) = imagenIN(i, j);
 		}
 	}
-	*/
+	
 	 
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("Hercules_GrisMOD1.bmp");
