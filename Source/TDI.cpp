@@ -189,9 +189,9 @@ int main(int argc, char **argv)
 					x2 = xr + sxIN;
 					y2 = yr + syIN;
 
-					//Con lround redondeamos a la parte entera
-					ip = lround(x2);		//Parte entera de x
-					jp = lround(y2);		//Parte entera de y
+					//En este caso nos interesa la parte entera unicamente
+					ip = trunc(x2);		//Parte entera de x
+					jp = trunc(y2);		//Parte entera de y
 
 					i1 = ip + 1;			//Indice derecho a i
 					j1 = jp + 1;			//Indice inferior a j
@@ -208,6 +208,7 @@ int main(int argc, char **argv)
 					f1 = a1 * a2;		f2 = b1 * a2;		f3 = a1 * b2;		f4 = a2 * b2;
 
 					imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(i1, jp) + f3 * imagenIN(ip, j1) + f4 * imagenIN(i1, j1);
+					//Error matrix not suitable for bmp file cuando se ponen angulos que no sean 0, 90, 180, 270...
 				}
 			}
 			break;
