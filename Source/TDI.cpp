@@ -3,6 +3,7 @@
 #include <C_General.hpp>
 #include <C_Matrix.hpp>
 #include <C_Image.hpp>
+#include <windows.h>
 
 #define PI 3.14159265
 
@@ -11,22 +12,29 @@ int main(int argc, char **argv)
 	long i, j;
 
 	//strcat(destino, origen) // Agrega el contenido de origen al final de destino
+	//C:\\Users\\Manuel\\source\\repos\\mpmanuel98\\practicaTDI\\Debug\\Hercules_Gris.bmp
+	//C:\\Users\\Manuel\\source\\repos\\mpmanuel98\\practicaTDI\\Run\\Hercules_Gris.bmp
+	//C:\Users\Manuel\source\repos\mpmanuel98\practicaTDI\Run\Hercules_Gris.bmp
 
 	//Pedimos al usuario que seleccione la imagen a rotar
-	C_Image imagenIN;
 	/*
-	char name[100];
+	char name[50];
 	printf("Introduzca el nombre de la imagen que desea rotar: ");
 	fgets(name, 100, stdin);
 
 	if (C_FileExists(name)) {
 		printf("\nExisto!!! \n");
 	}
-
-	printf("%s\n", name);
 	*/
-	imagenIN.ReadBMP("Hercules_Gris.bmp");
 
+	C_Image imagenIN;
+	imagenIN.ReadBMP("Hercules_Gris.bmp");
+	
+	/*
+	TCHAR sCurrentDir[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, sCurrentDir);
+	*/
+	
 	//Pedimos al usuario que introduzca el angulo a rotar
 	long angulo = -1;
 	do {
