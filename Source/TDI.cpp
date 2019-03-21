@@ -96,8 +96,6 @@ int main(int argc, char **argv)
 	long Np = imagenOUT.RowN();
 	long Mp = imagenOUT.ColN();
 
-	printf("FilasRot: %ld, ColumnasRot: %ld\n", Np, Mp);
-
 	//Mitad de fila y columna de la nueva matriz
 	double Np2 = Np / 2;
 	double Mp2 = Mp / 2;
@@ -109,7 +107,6 @@ int main(int argc, char **argv)
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
 	double sxOUT = imagenOUT.FirstRow() + Np2;
 	double syOUT = imagenOUT.FirstCol() + Mp2;
-	
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("____________________ ALGORITMOS ____________________\n");
