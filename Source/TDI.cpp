@@ -1,54 +1,45 @@
 #include <stdio.h>
+#include <iostream>
 #include <math.h>
 #include <C_General.hpp>
 #include <C_Matrix.hpp>
 #include <C_Image.hpp>
-#include <windows.h>
 
 #define PI 3.14159265
 
 int main(int argc, char **argv)
 {
+	//Indices de recorrido de bucles
 	long i, j;
 
-	//strcat(destino, origen) // Agrega el contenido de origen al final de destino
-	//C:\\Users\\Manuel\\source\\repos\\mpmanuel98\\practicaTDI\\Debug\\Hercules_Gris.bmp
-	//C:\\Users\\Manuel\\source\\repos\\mpmanuel98\\practicaTDI\\Run\\Hercules_Gris.bmp
-	//C:\Users\Manuel\source\repos\mpmanuel98\practicaTDI\Run\Hercules_Gris.bmp
-
-	//Pedimos al usuario que seleccione la imagen a rotar
-	/*
+	//Se pide al usuario que introduzca el nombre de la imagen a rotar
+	string name1;
 	char name[50];
-	printf("Introduzca el nombre de la imagen que desea rotar: ");
-	fgets(name, 100, stdin);
+	do {
+		printf("Introduzca el nombre de la imagen BMP que desea rotar (sin la extension): ");
+		getline(cin, name1);
+		strcpy(name, name1.c_str());
+		strcat(name, ".bmp");
+	} while (!C_FileExists(name));
 
-	if (C_FileExists(name)) {
-		printf("\nExisto!!! \n");
-	}
-	*/
-
+	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Hercules_Gris.bmp");
-	
-	/*
-	TCHAR sCurrentDir[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, sCurrentDir);
-	*/
-	
-	//Pedimos al usuario que introduzca el angulo a rotar
+	imagenIN.ReadBMP(name);
+
+	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
 	do {
 		printf("Introduzca los grados (entre 0 y 360) que desea rotar la imagen: ");
 		scanf("%ld", &angulo);
 	} while (angulo < 0 || angulo > 360);
 
-	//Calculamos el seno y coseno del angulo a rotar (en radianes)
+	//Se calcula el seno y coseno del angulo a rotar (en radianes)
 	double st, ct;
 	ct = cos((angulo * 2 * PI) / 360);
 	st = sin((angulo * 2 * PI) / 360);
 	
 	/*
-	//Calculamos el seno y coseno del angulo a rotar (en grados)
+	//Se calcula el seno y coseno del angulo a rotar (en grados)
 	double st, ct;
 	ct = cos((angulo * 2 * PI) / 360);
 	st = sin((angulo * 2 * PI) / 360);
@@ -57,9 +48,7 @@ int main(int argc, char **argv)
 	//Filas y columnas de la matriz original
 	long N = imagenIN.RowN();
 	long M = imagenIN.ColN();
-
-	printf("Filas: %ld, Columnas: %ld\n", N, M);
-
+	
 	//Mitad de fila y columna de la matriz original
 	double N2 = N / 2;
 	double M2 = M / 2;
@@ -78,7 +67,7 @@ int main(int argc, char **argv)
 	long q2 = LONG_MIN;
 
 	/*
-		Calculamos los indices de fila y columna para la nueva matriz:
+		Se calculan los indices de fila y columna para la nueva matriz:
 		p1 -> primera fila
 		p2 -> ultima fila
 		q1 -> primera columna
@@ -100,7 +89,7 @@ int main(int argc, char **argv)
 		if (q[i] > q2) q2 = q[i];
 	}
 
-	//Creamos la nueva imagen (matriz)
+	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
 
 	//Filas y columnas de la nueva matriz
@@ -122,7 +111,7 @@ int main(int argc, char **argv)
 	double syOUT = imagenOUT.FirstCol() + Mp2;
 	
 	
-	//Pedimos al usuario que seleccione el algoritmo a aplicar
+	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("____________________ ALGORITMOS ____________________\n");
 	printf("0 -> Algoritmo de rotacion directa.\n");
 	printf("1 -> Algoritmo de rotacion inversa.\n");
@@ -165,7 +154,7 @@ int main(int argc, char **argv)
 					xr = ct * xp + st * yp;
 					yr = -st * xp + ct * yp;
 
-					//Con lround redondeamos a la parte entera
+					//Con lround se redondea a la parte entera
 					ip = lround(xr + sxIN);
 					jp = lround(yr + syIN);
 
@@ -197,7 +186,7 @@ int main(int argc, char **argv)
 					x2 = xr + sxIN;
 					y2 = yr + syIN;
 
-					//En este caso nos interesa la parte entera unicamente
+					//En este caso interesa la parte entera unicamente
 					ip = trunc(x2);		//Parte entera de x
 					jp = trunc(y2);		//Parte entera de y
 
@@ -227,7 +216,7 @@ int main(int argc, char **argv)
 	}
 	
 	imagenOUT.palette = imagenIN.palette;
-	imagenOUT.WriteBMP("Hercules_GrisRot.bmp");
+	imagenOUT.WriteBMP("ImagenRotada.bmp");
 
 	/*	Hay que implementarlo con mas algoritmos como el de los k vecinos mas cercanos y el de busqueda binaria/cuadratica	*/	
 
