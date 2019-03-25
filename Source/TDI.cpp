@@ -12,6 +12,7 @@ int main(int argc, char **argv)
 	//Indices de recorrido de bucles
 	long i, j;
 
+	/*
 	//Se pide al usuario que introduzca el nombre de la imagen a rotar
 	string name1;
 	char name[50];
@@ -22,15 +23,17 @@ int main(int argc, char **argv)
 		strcat(name, ".bmp");
 	} while (!C_FileExists(name));
 
+	*/
+
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP(name);
+	imagenIN.ReadBMP("Cuadro_PaisajeCuad.bmp");
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
 	do {
 		printf("Introduzca los grados (entre 0 y 360) que desea rotar la imagen: ");
-		scanf("%ld", &angulo);
+		scanf_s("%ld", &angulo);
 	} while (angulo < 0 || angulo > 360);
 
 	//Se calcula el seno y coseno del angulo a rotar (en radianes)
@@ -110,20 +113,21 @@ int main(int argc, char **argv)
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("____________________ ALGORITMOS ____________________\n");
-	printf("0 -> Algoritmo de rotacion directa.\n");
-	printf("1 -> Algoritmo de rotacion inversa.\n");
-	printf("2 -> Algoritmo de rotacion inversa bis.\n");
+	printf("0 -> Algoritmo de rotacion directa (k vecinos mas cercanos).\n");
+	printf("1 -> Algoritmo de rotacion inversa (k vecinos mas cercanos).\n");
+	printf("2 -> Algoritmo de rotacion inversa (interpolacion lineal).\n");
 
 	int algoritmo = -1;
 	do {
 		printf("Seleccione el algoritmo que desea aplicar: ");
-		scanf("%ld", &algoritmo);
+		scanf_s("%ld", &algoritmo);
 	} while (algoritmo < 0 || algoritmo > 3);
 
 	long ip, jp;
 	switch (algoritmo) {
 		case 0:
-			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION
+			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION (k vecinos mas cercanos)
+			printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", p1, p2, q1, q2);
 			for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
 				yp = j - syIN;
 				for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
@@ -136,20 +140,21 @@ int main(int argc, char **argv)
 					ip = lround(xr + sxOUT);
 					jp = lround(yr + syOUT);
 
+					//printf("ip: %ld, jp: %ld\n", ip, jp);
 					imagenOUT(ip, jp) = imagenIN(i, j);
 				}
 			}
 			break;
 
 		case 1:
-			//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION
+			//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION (k vecinos mas cercanos)
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
 				yp = j - syOUT;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
 					xp = i - sxOUT;
 
-					xr = ct * xp + st * yp;
-					yr = -st * xp + ct * yp;
+					xr = xp * ct + yp * st;
+					yr = -xp * st + yp * ct;
 
 					//Con lround se redondea a la parte entera
 					ip = lround(xr + sxIN);
@@ -161,14 +166,12 @@ int main(int argc, char **argv)
 					else {
 						imagenOUT(i, j) = 127.0;
 					}
-
-					//imagenOUT(i, j) = imagenIN(ip, jp);
 				}
 			}
 			break;
 
 		case 2:
-			//ALGORITMO DE ROTACION INVERSA BIS (FUENTE BIBLIOGRAFICA)
+			//ALGORITMO DE ROTACION INVERSA BIS (interpolacion lineal) (FUENTE BIBLIOGRAFICA)
 			double ys, yc, x2, y2, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4;
 			long i1, j1;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
@@ -202,7 +205,6 @@ int main(int argc, char **argv)
 					f1 = a1 * a2;		f2 = b1 * a2;		f3 = a1 * b2;		f4 = a2 * b2;
 
 					imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(i1, jp) + f3 * imagenIN(ip, j1) + f4 * imagenIN(i1, j1);
-					//Error matrix not suitable for bmp file cuando se ponen angulos que no sean 0, 90, 180, 270...
 				}
 			}
 			break;
@@ -215,7 +217,7 @@ int main(int argc, char **argv)
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("ImagenRotada.bmp");
 
-	/*	Hay que implementarlo con mas algoritmos como el de los k vecinos mas cercanos y el de busqueda binaria/cuadratica	*/	
+	/*	Hay que implementarlo con mas algoritmos como el de los k vecinos mas cercanos y el bicubico/bilineal	*/	
 
 	return 0;
 }
