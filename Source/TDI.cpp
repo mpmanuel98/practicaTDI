@@ -28,6 +28,7 @@ int main(int argc, char **argv)
 	//Creamos la imagen original
 	C_Image imagenIN;
 	imagenIN.ReadBMP("Cuadro_PaisajeCuad.bmp");
+	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
@@ -56,6 +57,8 @@ int main(int argc, char **argv)
 	double N2 = N / 2;
 	double M2 = M / 2;
 
+	printf("N2: %lf, M2: %lf\n", N2, M2);
+
 	//Esquinas de la matriz original
 	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
 	long y[] = { imagenIN.FirstCol(), imagenIN.FirstCol(), imagenIN.LastCol(), imagenIN.LastCol() };
@@ -80,6 +83,7 @@ int main(int argc, char **argv)
 	for (i = 0; i < 4; i++) {
 		xp = x[i] - N2;
 		yp = y[i] - M2;
+
 		xr = xp * ct + yp * st;
 		yr = -xp * st + yp * ct;
 
@@ -92,8 +96,12 @@ int main(int argc, char **argv)
 		if (q[i] > q2) q2 = q[i];
 	}
 
+	printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", p1, p2, q1, q2);
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
+	imagenOUT.Reindex(0, 0);
+
+	printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", imagenOUT.FirstRow(), imagenOUT.LastRow(), imagenOUT.FirstCol(), imagenOUT.LastCol());
 
 	//Filas y columnas de la nueva matriz
 	long Np = imagenOUT.RowN();
@@ -127,14 +135,13 @@ int main(int argc, char **argv)
 	switch (algoritmo) {
 		case 0:
 			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION (k vecinos mas cercanos)
-			printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", p1, p2, q1, q2);
 			for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
 				yp = j - syIN;
 				for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
 					xp = i - sxIN;
 
-					xr = xp * ct + yp * st;
-					yr = -xp * st + yp * ct;
+					xr = xp * ct - yp * st;
+					yr = xp * st + yp * ct;
 
 					//Con lround redondeamos a la parte entera
 					ip = lround(xr + sxOUT);
