@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Cuadro_PaisajeCuad.bmp");
+	imagenIN.ReadBMP("Sierra_Nevada.bmp");
 	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
@@ -39,14 +39,14 @@ int main(int argc, char **argv)
 
 	//Se calcula el seno y coseno del angulo a rotar (en radianes)
 	double st, ct;
-	ct = cos((angulo * 2 * PI) / 360);
-	st = sin((angulo * 2 * PI) / 360);
+	ct = cos((angulo * PI) / 180);
+	st = sin((angulo * PI) / 180);
 	
 	/*
 	//Se calcula el seno y coseno del angulo a rotar (en grados)
 	double st, ct;
-	ct = cos((angulo * 2 * PI) / 360);
-	st = sin((angulo * 2 * PI) / 360);
+	ct = cos(angulo);
+	st = sin(angulo);
 	*/
 
 	//Filas y columnas de la matriz original
@@ -56,6 +56,10 @@ int main(int argc, char **argv)
 	//Mitad de fila y columna de la matriz original
 	double N2 = N / 2;
 	double M2 = M / 2;
+
+	//Valores centrales en la matriz original (corrimientos acumulados)
+	double sxIN = imagenIN.FirstRow() + N2;
+	double syIN = imagenIN.FirstCol() + M2;
 
 	printf("N2: %lf, M2: %lf\n", N2, M2);
 
@@ -111,10 +115,6 @@ int main(int argc, char **argv)
 	double Np2 = Np / 2;
 	double Mp2 = Mp / 2;
 
-	//Valores centrales en la matriz original (corrimientos acumulados)
-	double sxIN = imagenIN.FirstRow() + N2;
-	double syIN = imagenIN.FirstCol() + M2;
-
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
 	double sxOUT = imagenOUT.FirstRow() + Np2;
 	double syOUT = imagenOUT.FirstCol() + Mp2;
@@ -167,6 +167,7 @@ int main(int argc, char **argv)
 					ip = lround(xr + sxIN);
 					jp = lround(yr + syIN);
 
+					//Se mapearan en la nueva imagen aquellos pixeles que existan en la imagen original
 					if ((ip >= imagenIN.FirstRow()) && (jp >= imagenIN.FirstCol()) && (ip <= imagenIN.LastRow()) && (jp <= imagenIN.LastCol())) {
 						imagenOUT(i, j) = imagenIN(ip, jp);
 					}
@@ -178,7 +179,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 2:
-			//ALGORITMO DE ROTACION INVERSA BIS (interpolacion lineal) (FUENTE BIBLIOGRAFICA)
+			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION (FUENTE BIBLIOGRAFICA)
 			double ys, yc, x2, y2, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4;
 			long i1, j1;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
@@ -194,8 +195,8 @@ int main(int argc, char **argv)
 					y2 = yr + syIN;
 
 					//En este caso interesa la parte entera unicamente
-					ip = trunc(x2);		//Parte entera de x
-					jp = trunc(y2);		//Parte entera de y
+					ip = trunc(x2);			//Parte entera de x
+					jp = trunc(y2);			//Parte entera de y
 
 					i1 = ip + 1;			//Indice derecho a i
 					j1 = jp + 1;			//Indice inferior a j
@@ -224,7 +225,7 @@ int main(int argc, char **argv)
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("ImagenRotada.bmp");
 
-	/*	Hay que implementarlo con mas algoritmos como el de los k vecinos mas cercanos y el bicubico/bilineal	*/	
+	/*	Hay que implementarlo con mas algoritmos como el bicubico/bilineal ademas de aplicar la interpolacion	*/	
 
 	return 0;
 }
