@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Sierra_Nevada.bmp");
+	imagenIN.ReadBMP("Hercules.bmp");
 	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
@@ -163,40 +163,41 @@ int main(int argc, char **argv)
 
 		case 2:
 			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION BILINEAR
-			double ys, yc, x2, y2, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4;
+			double xx, yy, f1, f2, f3, f4;
 			long i1, j1;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
 				yp = j - Mp2;
-				ys = -st * yp;
-				yc = ct * yp;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
 					xp = i - Np2;
 
-					xr = xp * ct + ys;
-					yr = xp * st + yc;
+					xr = xp * ct + yp * st;
+					yr = -xp * st + yp * ct;
 
-					x2 = xr + N2;
-					y2 = yr + M2;
+					xx = xr + N2;
+					yy = yr + M2;
 
-					//En este caso interesa la parte entera unicamente
-					ip = trunc(x2);			//Parte entera de x
-					jp = trunc(y2);			//Parte entera de y
+					ip = trunc(xx);			//Parte entera de x
+					jp = trunc(yy);			//Parte entera de y
 
-					i1 = ip + 1;			//Indice derecho a i
-					j1 = jp + 1;			//Indice inferior a j
+					i1 = ip + 1;			//Fila inferior a ip
+					j1 = jp + 1;			//Columna derecha a jp
 
-					c1 = x2 - ip;			//Error entre entero y decimal
-					d1 = y2 - jp;			//Error entre entero y decimal
+					if ((ip >= imagenIN.FirstRow()) && (ip <= imagenIN.LastRow()) && (i1 >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (jp <= imagenIN.LastCol()) && (j1 >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
+						//printf("xx: %lf, yy: %lf, ip: %ld, jp: %ld, i1: %ld, j1: %ld \n", xx, yy, ip, jp, i1, j1);
 
-					a1 = 1 - c1;			//a1 = 1 - c1 = c2
-					b1 = c1;				//b1 = 1 - c2 = c1
+						f1 = ((i1 - xx)*(j1 - yy)) / ((i1 - ip)*(j1 - jp));
 
-					a2 = 1 - d1;			//a2 = 1 - d1 = d2
-					b2 = d1;				//b2 = 1 - d2 = d1
+						f2 = ((xx - ip)*(j1 - yy)) / ((i1 - ip)*(j1 - jp));
 
-					f1 = a1 * a2;		f2 = b1 * a2;		f3 = a1 * b2;		f4 = a2 * b2;
+						f3 = ((i1 - xx)*(yy - jp)) / ((i1 - ip)*(j1 - jp));
 
-					imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(i1, jp) + f3 * imagenIN(ip, j1) + f4 * imagenIN(i1, j1);
+						f4 = ((xx - ip)*(yy - jp)) / ((i1 - ip)*(j1 - jp));
+
+
+						//printf("f1: %lf, f2: %lf, f3: %lf, f4: %lf, suma: %lf \n", f1, f2, f3, f4, (f1 + f2 + f3 + f4));
+
+						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
+					}
 				}
 			}
 			break;
