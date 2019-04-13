@@ -41,13 +41,6 @@ int main(int argc, char **argv)
 	double st, ct;
 	ct = cos((angulo * PI) / 180);
 	st = sin((angulo * PI) / 180);
-	
-	/*
-	//Se calcula el seno y coseno del angulo a rotar (en grados)
-	double st, ct;
-	ct = cos(angulo);
-	st = sin(angulo);
-	*/
 
 	//Filas y columnas de la matriz original
 	long N = imagenIN.RowN();
@@ -56,11 +49,6 @@ int main(int argc, char **argv)
 	//Mitad de fila y columna de la matriz original
 	double N2 = N / 2;
 	double M2 = M / 2;
-
-	//Valores centrales en la matriz original (corrimientos acumulados)
-	double sxIN = imagenIN.FirstRow() + N2;
-	double syIN = imagenIN.FirstCol() + M2;
-
 	printf("N2: %lf, M2: %lf\n", N2, M2);
 
 	//Esquinas de la matriz original
@@ -99,13 +87,11 @@ int main(int argc, char **argv)
 		if (q[i] < q1) q1 = q[i];
 		if (q[i] > q2) q2 = q[i];
 	}
-
 	printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", p1, p2, q1, q2);
+
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
 	imagenOUT.Reindex(0, 0);
-
-	printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", imagenOUT.FirstRow(), imagenOUT.LastRow(), imagenOUT.FirstCol(), imagenOUT.LastCol());
 
 	//Filas y columnas de la nueva matriz
 	long Np = imagenOUT.RowN();
@@ -114,16 +100,12 @@ int main(int argc, char **argv)
 	//Mitad de fila y columna de la nueva matriz
 	double Np2 = Np / 2;
 	double Mp2 = Mp / 2;
-
-	//Valores centrales en la nueva matriz (corrimientos acumulados)
-	double sxOUT = imagenOUT.FirstRow() + Np2;
-	double syOUT = imagenOUT.FirstCol() + Mp2;
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("____________________ ALGORITMOS ____________________\n");
-	printf("0 -> Algoritmo de rotacion directa (k vecinos mas cercanos).\n");
-	printf("1 -> Algoritmo de rotacion inversa (k vecinos mas cercanos).\n");
-	printf("2 -> Algoritmo de rotacion inversa (interpolacion lineal).\n");
+	printf("0 -> Algoritmo de rotacion directa (vecino mas cercano).\n");
+	printf("1 -> Algoritmo de rotacion inversa (vecino mas cercano).\n");
+	printf("2 -> Algoritmo de rotacion inversa (interpolacion bilineal).\n");
 
 	int algoritmo = -1;
 	do {
@@ -134,65 +116,67 @@ int main(int argc, char **argv)
 	long ip, jp;
 	switch (algoritmo) {
 		case 0:
-			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION (k vecinos mas cercanos)
+			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION (vecino mas cercano)
 			for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
-				yp = j - syIN;
+				yp = j - M2;
 				for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
-					xp = i - sxIN;
+					xp = i - N2;
 
-					xr = xp * ct - yp * st;
-					yr = xp * st + yp * ct;
+					xr = xp * ct + yp * st;
+					yr = -xp * st + yp * ct;
 
-					//Con lround redondeamos a la parte entera
-					ip = lround(xr + sxOUT);
-					jp = lround(yr + syOUT);
+					//Con lround se redondean las coordenadas a las del pixel mas cercano
+					ip = lround(xr + Np2);
+					jp = lround(yr + Mp2);
 
 					//printf("ip: %ld, jp: %ld\n", ip, jp);
-					imagenOUT(ip, jp) = imagenIN(i, j);
+
+					//Se mapearan en la nueva imagen aquellos pixeles que no se salgan de su rango
+					if ((ip >= imagenOUT.FirstRow()) && (jp >= imagenOUT.FirstCol()) && (ip <= imagenOUT.LastRow()) && (jp <= imagenOUT.LastCol())) {
+						imagenOUT(ip, jp) = imagenIN(i, j);
+					}
 				}
 			}
 			break;
 
 		case 1:
-			//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION (k vecinos mas cercanos)
+			//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION (vecino mas cercano)
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
-				yp = j - syOUT;
+				yp = j - Mp2;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
-					xp = i - sxOUT;
+					xp = i - Np2;
 
 					xr = xp * ct + yp * st;
 					yr = -xp * st + yp * ct;
 
-					//Con lround se redondea a la parte entera
-					ip = lround(xr + sxIN);
-					jp = lround(yr + syIN);
+					//Con lround se redondean las coordenadas a las del pixel mas cercano
+					ip = lround(xr + N2);
+					jp = lround(yr + M2);
 
 					//Se mapearan en la nueva imagen aquellos pixeles que existan en la imagen original
 					if ((ip >= imagenIN.FirstRow()) && (jp >= imagenIN.FirstCol()) && (ip <= imagenIN.LastRow()) && (jp <= imagenIN.LastCol())) {
 						imagenOUT(i, j) = imagenIN(ip, jp);
-					}
-					else {
-						imagenOUT(i, j) = 127.0;
 					}
 				}
 			}
 			break;
 
 		case 2:
-			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION (FUENTE BIBLIOGRAFICA)
+			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION BILINEAR
 			double ys, yc, x2, y2, c1, d1, a1, b1, a2, b2, f1, f2, f3, f4;
 			long i1, j1;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
-				yp = j - syOUT;
+				yp = j - Mp2;
 				ys = -st * yp;
 				yc = ct * yp;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
-					xp = i - sxOUT;
+					xp = i - Np2;
+
 					xr = xp * ct + ys;
 					yr = xp * st + yc;
 
-					x2 = xr + sxIN;
-					y2 = yr + syIN;
+					x2 = xr + N2;
+					y2 = yr + M2;
 
 					//En este caso interesa la parte entera unicamente
 					ip = trunc(x2);			//Parte entera de x
