@@ -27,8 +27,8 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Playa_Roquetas.bmp");
-	imagenIN.Reindex(0, 0);
+	imagenIN.ReadBMP("Cuad.bmp");
+	imagenIN.Reindex(5000, 5000);
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
@@ -49,7 +49,10 @@ int main(int argc, char **argv)
 	//Mitad de fila y columna de la matriz original
 	double N2 = N / 2;
 	double M2 = M / 2;
-	printf("N2: %lf, M2: %lf\n", N2, M2);
+
+	//Valores centrales en la matriz original (corrimientos acumulados)
+	double sxIN = imagenIN.FirstRow() + N2;
+	double syIN = imagenIN.FirstCol() + M2;
 
 	//Esquinas de la matriz original
 	long x[] = { imagenIN.FirstRow(), imagenIN.LastRow(), imagenIN.FirstRow(), imagenIN.LastRow() };
@@ -87,11 +90,10 @@ int main(int argc, char **argv)
 		if (q[i] < q1) q1 = q[i];
 		if (q[i] > q2) q2 = q[i];
 	}
-	printf("p1: %ld, p2: %ld, q1: %ld, q2: %ld\n", p1, p2, q1, q2);
 
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
-	imagenOUT.Reindex(0, 0);
+	imagenOUT.Reindex(5000, 5000);
 
 	//Filas y columnas de la nueva matriz
 	long Np = imagenOUT.RowN();
@@ -100,6 +102,10 @@ int main(int argc, char **argv)
 	//Mitad de fila y columna de la nueva matriz
 	double Np2 = Np / 2;
 	double Mp2 = Mp / 2;
+
+	//Valores centrales en la nueva matriz (corrimientos acumulados)
+	double sxOUT = imagenOUT.FirstRow() + Np2;
+	double syOUT = imagenOUT.FirstCol() + Mp2;
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("____________________ ALGORITMOS ____________________\n");
@@ -118,16 +124,16 @@ int main(int argc, char **argv)
 		case 0:
 			//ALGORITMO DE IMPLEMENTACION DIRECTA DE LA ROTACION (vecino mas cercano)
 			for (j = imagenIN.FirstCol(); j <= imagenIN.LastCol(); j++) {
-				yp = j - M2;
+				yp = j - syIN;
 				for (i = imagenIN.FirstRow(); i <= imagenIN.LastRow(); i++) {
-					xp = i - N2;
+					xp = i - sxIN;
 
 					xr = xp * ct + yp * st;
 					yr = -xp * st + yp * ct;
 
 					//Con lround se redondean las coordenadas a las del pixel mas cercano
-					ip = lround(xr + Np2);
-					jp = lround(yr + Mp2);
+					ip = lround(xr + sxOUT);
+					jp = lround(yr + syOUT);
 
 					//Se mapearan en la nueva imagen aquellos pixeles que no se salgan de su rango
 					if ((ip >= imagenOUT.FirstRow()) && (jp >= imagenOUT.FirstCol()) && (ip <= imagenOUT.LastRow()) && (jp <= imagenOUT.LastCol())) {
@@ -140,16 +146,16 @@ int main(int argc, char **argv)
 		case 1:
 			//ALGORITMO DE IMPLEMENTACION INVERSA DE LA ROTACION (vecino mas cercano)
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
-				yp = j - Mp2;
+				yp = j - syOUT;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
-					xp = i - Np2;
+					xp = i - sxOUT;
 
 					xr = xp * ct + yp * st;
 					yr = -xp * st + yp * ct;
 
 					//Con lround se redondean las coordenadas a las del pixel mas cercano
-					ip = lround(xr + N2);
-					jp = lround(yr + M2);
+					ip = lround(xr + sxIN);
+					jp = lround(yr + syIN);
 
 					//Se mapearan en la nueva imagen aquellos pixeles que existan en la imagen original
 					if ((ip >= imagenIN.FirstRow()) && (jp >= imagenIN.FirstCol()) && (ip <= imagenIN.LastRow()) && (jp <= imagenIN.LastCol())) {
@@ -164,15 +170,15 @@ int main(int argc, char **argv)
 			double xx, yy, f1, f2, f3, f4;
 			long i1, j1;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
-				yp = j - Mp2;
+				yp = j - syOUT;
 				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
-					xp = i - Np2;
+					xp = i - sxOUT;
 
 					xr = xp * ct + yp * st;
 					yr = -xp * st + yp * ct;
 
-					xx = xr + N2;
-					yy = yr + M2;
+					xx = xr + sxIN;
+					yy = yr + syIN;
 
 					ip = trunc(xx);			//Parte entera de x
 					jp = trunc(yy);			//Parte entera de y
@@ -192,24 +198,7 @@ int main(int argc, char **argv)
 
 						f4 = ((xx - ip)*(yy - jp)) / ((i1 - ip)*(j1 - jp));
 
-						//printf("f1: %lf, f2: %lf, f3: %lf, f4: %lf, suma: %lf \n", f1, f2, f3, f4, (f1 + f2 + f3 + f4));
-
-						if (yy < 0) {
-							printf("NEGATIVO");
-						}
-						
-						if (f2 < 0) {
-							//printf("f2: %lf \n", f2);
-						}
-
-						if (f3 < 0) {
-							//printf("f3: %lf \n", f3);
-						}
-
-						if (f4 < 0) {
-							//printf("f4: %lf \n", f4);
-						}
-						
+						//printf("f1: %lf, f2: %lf, f3: %lf, f4: %lf, suma: %lf \n", f1, f2, f3, f4, (f1 + f2 + f3 + f4));						
 						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
 
 						//printf("Valor pixel: %lf \n", imagenOUT(i,j));
