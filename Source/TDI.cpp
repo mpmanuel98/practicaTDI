@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Hercules.bmp");
+	imagenIN.ReadBMP("Playa_Roquetas.bmp");
 	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
@@ -129,8 +129,6 @@ int main(int argc, char **argv)
 					ip = lround(xr + Np2);
 					jp = lround(yr + Mp2);
 
-					//printf("ip: %ld, jp: %ld\n", ip, jp);
-
 					//Se mapearan en la nueva imagen aquellos pixeles que no se salgan de su rango
 					if ((ip >= imagenOUT.FirstRow()) && (jp >= imagenOUT.FirstCol()) && (ip <= imagenOUT.LastRow()) && (jp <= imagenOUT.LastCol())) {
 						imagenOUT(ip, jp) = imagenIN(i, j);
@@ -185,6 +183,7 @@ int main(int argc, char **argv)
 					if ((ip >= imagenIN.FirstRow()) && (ip <= imagenIN.LastRow()) && (i1 >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (jp <= imagenIN.LastCol()) && (j1 >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
 						//printf("xx: %lf, yy: %lf, ip: %ld, jp: %ld, i1: %ld, j1: %ld \n", xx, yy, ip, jp, i1, j1);
 
+						//Se calculan los coeficientes para cada pixel de alrededor del obtenido en funcion de la distancia entre ellos
 						f1 = ((i1 - xx)*(j1 - yy)) / ((i1 - ip)*(j1 - jp));
 
 						f2 = ((xx - ip)*(j1 - yy)) / ((i1 - ip)*(j1 - jp));
@@ -193,10 +192,27 @@ int main(int argc, char **argv)
 
 						f4 = ((xx - ip)*(yy - jp)) / ((i1 - ip)*(j1 - jp));
 
-
 						//printf("f1: %lf, f2: %lf, f3: %lf, f4: %lf, suma: %lf \n", f1, f2, f3, f4, (f1 + f2 + f3 + f4));
 
+						if (yy < 0) {
+							printf("NEGATIVO");
+						}
+						
+						if (f2 < 0) {
+							//printf("f2: %lf \n", f2);
+						}
+
+						if (f3 < 0) {
+							//printf("f3: %lf \n", f3);
+						}
+
+						if (f4 < 0) {
+							//printf("f4: %lf \n", f4);
+						}
+						
 						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
+
+						//printf("Valor pixel: %lf \n", imagenOUT(i,j));
 					}
 				}
 			}
@@ -207,10 +223,10 @@ int main(int argc, char **argv)
 			break;
 	}
 	
+	printf("MAX: %lf , MIN: %lf \n", imagenOUT.Max(), imagenOUT.Min());
+
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("ImagenRotada.bmp");
-
-	/*	Hay que implementarlo con mas algoritmos como el bicubico/bilineal ademas de aplicar la interpolacion	*/	
 
 	return 0;
 }
