@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	string name1;
 	char name[50];
 	do {
-		printf("Introduzca el nombre de la imagen BMP que desea rotar (sin la extension): ");
+		printf("Introduzca el nombre de la imagen en formato BMP que desea rotar (sin la extension): ");
 		getline(cin, name1);
 		strcpy(name, name1.c_str());
 		strcat(name, ".bmp");
@@ -38,8 +38,8 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Hercules.bmp");
-	imagenIN.Reindex(5000, 5000);
+	imagenIN.ReadBMP("Sierra_Nevada.bmp");
+	imagenIN.Reindex(10000, 10000);
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
-	imagenOUT.Reindex(5000, 5000);
+	imagenOUT.Reindex(10000, 10000);
 
 	//Filas y columnas de la nueva matriz
 	long Np = imagenOUT.RowN();
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 	double syOUT = imagenOUT.FirstCol() + Mp2;
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
-	printf("____________________ ALGORITMOS ____________________\n");
+	printf("__________________________ ALGORITMOS __________________________\n");
 	printf("0 -> Algoritmo de rotacion directa (vecino mas cercano).\n");
 	printf("1 -> Algoritmo de rotacion inversa (vecino mas cercano).\n");
 	printf("2 -> Algoritmo de rotacion inversa (interpolacion bilineal).\n");
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 
 		case 3:
 			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION BICUBICA
-			double valorPixel;
+			double a, b, valorPixel;
 			long ip1, ip2, jp1, jp2, beforeip, beforejp;
 			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
 				yp = j - syOUT;
@@ -245,45 +245,46 @@ int main(int argc, char **argv)
 					jp2 = jp + 2;			//Columna 2 mas adelante a jp
 					beforejp = jp - 1;		//Columna anterior a jp
 
+					a = xx - ip;
+					b = yy - jp;
 					valorPixel = 0;
+
 					if ((beforeip >= imagenIN.FirstRow()) && (ip2 <= imagenIN.LastRow()) && (beforejp >= imagenIN.FirstCol()) && (jp2 <= imagenIN.LastCol())) {
 						//Pixel (0,0)
-						valorPixel += (imagenIN(beforeip, beforejp)	* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((yy - beforejp) - (-1)));
+						valorPixel += (imagenIN(beforeip, beforejp)	* calculoCoef(-1 - a)		* calculoCoef(b - (-1)));
 						//Pixel (0,1)
-						valorPixel += (imagenIN(ip, beforejp)		* calculoCoef(0 - (xx - ip))			* calculoCoef((yy - beforejp) - (-1)));
+						valorPixel += (imagenIN(ip, beforejp)		* calculoCoef(0 - a)		* calculoCoef(b - (-1)));
 						//Pixel (0,2)
-						valorPixel += (imagenIN(ip1, beforejp)		* calculoCoef(1 - (ip1 - xx))			* calculoCoef((yy - beforejp) - (-1)));
+						valorPixel += (imagenIN(ip1, beforejp)		* calculoCoef(1 - a)		* calculoCoef(b - (-1)));
 						//Pixel (0,3)
-						valorPixel += (imagenIN(ip2, beforejp)		* calculoCoef(2 - (ip2 - xx))			* calculoCoef((yy - beforejp) - (-1)));
+						valorPixel += (imagenIN(ip2, beforejp)		* calculoCoef(2 - a)		* calculoCoef(b - (-1)));
 
 						//Pixel (1,0)
-						valorPixel += (imagenIN(beforeip, jp)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef(yy - jp));
+						valorPixel += (imagenIN(beforeip, jp)		* calculoCoef(-1 - a)		* calculoCoef(b));
 						//Pixel (1,1)
-						valorPixel += (imagenIN(ip, jp)				* calculoCoef(0 - (xx - ip))			* calculoCoef(yy - jp));
+						valorPixel += (imagenIN(ip, jp)				* calculoCoef(0 - a)		* calculoCoef(b));
 						//Pixel (1,2)
-						valorPixel += (imagenIN(ip1, jp)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef(yy - jp));
+						valorPixel += (imagenIN(ip1, jp)			* calculoCoef(1 - a)		* calculoCoef(b));
 						//Pixel (1,3)
-						valorPixel += (imagenIN(ip2, jp)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef(yy - jp));
+						valorPixel += (imagenIN(ip2, jp)			* calculoCoef(2 - a)		* calculoCoef(b));
 
 						//Pixel (2,0)
-						valorPixel += (imagenIN(beforeip, jp1)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((jp1 - yy) - 1));
+						valorPixel += (imagenIN(beforeip, jp1)		* calculoCoef(-1 - a)		* calculoCoef(b - 1));
 						//Pixel (2,1)
-						valorPixel += (imagenIN(ip, jp1)			* calculoCoef(0 - (xx - ip))			* calculoCoef((jp1 - yy) - 1));
+						valorPixel += (imagenIN(ip, jp1)			* calculoCoef(0 - a)		* calculoCoef(b - 1));
 						//Pixel (2,2)
-						valorPixel += (imagenIN(ip1, jp1)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef((jp1 - yy) - 1));
+						valorPixel += (imagenIN(ip1, jp1)			* calculoCoef(1 - a)		* calculoCoef(b - 1));
 						//Pixel (2,3)
-						valorPixel += (imagenIN(ip2, jp1)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef((jp1 - yy) - 1));
+						valorPixel += (imagenIN(ip2, jp1)			* calculoCoef(2 - a)		* calculoCoef(b - 1));
 
 						//Pixel (3,0)
-						valorPixel += (imagenIN(beforeip, jp2)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((jp2 - yy) - 2));
+						valorPixel += (imagenIN(beforeip, jp2)		* calculoCoef(-1 - a)		* calculoCoef(b - 2));
 						//Pixel (3,1)
-						valorPixel += (imagenIN(ip, jp2)			* calculoCoef(0 - (xx - ip))			* calculoCoef((jp2 - yy) - 2));
+						valorPixel += (imagenIN(ip, jp2)			* calculoCoef(0 - a)		* calculoCoef(b - 2));
 						//Pixel (3,2)
-						valorPixel += (imagenIN(ip1, jp2)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef((jp2 - yy) - 2));
+						valorPixel += (imagenIN(ip1, jp2)			* calculoCoef(1 - a)		* calculoCoef(b - 2));
 						//Pixel (3,3)
-						valorPixel += (imagenIN(ip2, jp2)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef((jp2 - yy) - 2));
-
-						//printf("valorPixel:  %lf \n", valorPixel);
+						valorPixel += (imagenIN(ip2, jp2)			* calculoCoef(2 - a)		* calculoCoef(b - 2));
 
 						imagenOUT(i, j) = valorPixel;
 					}
@@ -295,8 +296,6 @@ int main(int argc, char **argv)
 			printf("No ha seleccionado ningun algoritmo valido");
 			break;
 	}
-	
-	printf("MAX: %lf , MIN: %lf \n", imagenOUT.Max(), imagenOUT.Min());
 
 	imagenOUT.palette = imagenIN.palette;
 	imagenOUT.WriteBMP("ImagenRotada.bmp");
