@@ -7,6 +7,17 @@
 
 #define PI 3.14159265
 
+double max(double a) {
+	if (a > 0) return a;
+	return 0;
+}
+
+double calculoCoef(double k) {
+	double res;
+	res = (pow(max(k + 2), 3) + (-4 * pow(max(k + 1), 3)) + (6 * pow(max(k), 3)) + (-4 * pow(max(k - 1), 3))) / 6;
+	return res;
+}
+
 int main(int argc, char **argv)
 {
 	//Indices de recorrido de bucles
@@ -112,6 +123,7 @@ int main(int argc, char **argv)
 	printf("0 -> Algoritmo de rotacion directa (vecino mas cercano).\n");
 	printf("1 -> Algoritmo de rotacion inversa (vecino mas cercano).\n");
 	printf("2 -> Algoritmo de rotacion inversa (interpolacion bilineal).\n");
+	printf("3 -> Algoritmo de rotacion inversa (interpolacion bicubica).\n");
 
 	int algoritmo = -1;
 	do {
@@ -186,7 +198,7 @@ int main(int argc, char **argv)
 					i1 = ip + 1;			//Fila inferior a ip
 					j1 = jp + 1;			//Columna derecha a jp
 
-					if ((ip >= imagenIN.FirstRow()) && (ip <= imagenIN.LastRow()) && (i1 >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (jp <= imagenIN.LastCol()) && (j1 >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
+					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
 						//printf("xx: %lf, yy: %lf, ip: %ld, jp: %ld, i1: %ld, j1: %ld \n", xx, yy, ip, jp, i1, j1);
 
 						//Se calculan los coeficientes para cada pixel de alrededor del obtenido en funcion de la distancia entre ellos
@@ -207,7 +219,79 @@ int main(int argc, char **argv)
 			}
 			break;
 
-		default: 
+		case 3:
+			//ALGORITMO DE ROTACION INVERSA CON INTERPOLACION BICUBICA
+			double valorPixel;
+			long ip1, ip2, jp1, jp2, beforeip, beforejp;
+			for (j = imagenOUT.FirstCol(); j <= imagenOUT.LastCol(); j++) {
+				yp = j - syOUT;
+				for (i = imagenOUT.FirstRow(); i <= imagenOUT.LastRow(); i++) {
+					xp = i - sxOUT;
+
+					xr = xp * ct + yp * st;
+					yr = -xp * st + yp * ct;
+
+					xx = xr + sxIN;
+					yy = yr + syIN;
+
+					ip = trunc(xx);			//Parte entera de x
+					jp = trunc(yy);			//Parte entera de y
+
+					ip1 = ip + 1;			//Fila 1 mas adelante a ip
+					ip2 = ip + 2;			//Fila 2 mas adelante a ip
+					beforeip = ip - 1;		//Fila anterior a ip
+
+					jp1 = jp + 1;			//Columna 1 mas adelante a jp
+					jp2 = jp + 2;			//Columna 2 mas adelante a jp
+					beforejp = jp - 1;		//Columna anterior a jp
+
+					valorPixel = 0;
+					if ((beforeip >= imagenIN.FirstRow()) && (ip2 <= imagenIN.LastRow()) && (beforejp >= imagenIN.FirstCol()) && (jp2 <= imagenIN.LastCol())) {
+						//Pixel (0,0)
+						valorPixel += (imagenIN(beforeip, beforejp)	* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((yy - beforejp) - (-1)));
+						//Pixel (0,1)
+						valorPixel += (imagenIN(ip, beforejp)		* calculoCoef(0 - (xx - ip))			* calculoCoef((yy - beforejp) - (-1)));
+						//Pixel (0,2)
+						valorPixel += (imagenIN(ip1, beforejp)		* calculoCoef(1 - (ip1 - xx))			* calculoCoef((yy - beforejp) - (-1)));
+						//Pixel (0,3)
+						valorPixel += (imagenIN(ip2, beforejp)		* calculoCoef(2 - (ip2 - xx))			* calculoCoef((yy - beforejp) - (-1)));
+
+						//Pixel (1,0)
+						valorPixel += (imagenIN(beforeip, jp)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef(yy - jp));
+						//Pixel (1,1)
+						valorPixel += (imagenIN(ip, jp)				* calculoCoef(0 - (xx - ip))			* calculoCoef(yy - jp));
+						//Pixel (1,2)
+						valorPixel += (imagenIN(ip1, jp)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef(yy - jp));
+						//Pixel (1,3)
+						valorPixel += (imagenIN(ip2, jp)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef(yy - jp));
+
+						//Pixel (2,0)
+						valorPixel += (imagenIN(beforeip, jp1)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((jp1 - yy) - 1));
+						//Pixel (2,1)
+						valorPixel += (imagenIN(ip, jp1)			* calculoCoef(0 - (xx - ip))			* calculoCoef((jp1 - yy) - 1));
+						//Pixel (2,2)
+						valorPixel += (imagenIN(ip1, jp1)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef((jp1 - yy) - 1));
+						//Pixel (2,3)
+						valorPixel += (imagenIN(ip2, jp1)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef((jp1 - yy) - 1));
+
+						//Pixel (3,0)
+						valorPixel += (imagenIN(beforeip, jp2)		* calculoCoef(-1 - (xx - beforeip))		* calculoCoef((jp2 - yy) - 2));
+						//Pixel (3,1)
+						valorPixel += (imagenIN(ip, jp2)			* calculoCoef(0 - (xx - ip))			* calculoCoef((jp2 - yy) - 2));
+						//Pixel (3,2)
+						valorPixel += (imagenIN(ip1, jp2)			* calculoCoef(1 - (ip1 - xx))			* calculoCoef((jp2 - yy) - 2));
+						//Pixel (3,3)
+						valorPixel += (imagenIN(ip2, jp2)			* calculoCoef(2 - (ip2 - xx))			* calculoCoef((jp2 - yy) - 2));
+
+						//printf("valorPixel:  %lf \n", valorPixel);
+
+						imagenOUT(i, j) = valorPixel;
+					}
+				}
+			}
+			break;
+
+		default:
 			printf("No ha seleccionado ningun algoritmo valido");
 			break;
 	}
