@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 	//Creamos la imagen original
 	C_Image imagenIN;
-	imagenIN.ReadBMP("Cuad.bmp");
+	imagenIN.ReadBMP("Hercules.bmp");
 	imagenIN.Reindex(5000, 5000);
 
 	//Se pide al usuario que introduzca el angulo a rotar
