@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	//Se crea la imagen original
 	C_Image imagenIN;
 	//Se lee la imagen original
-	imagenIN.ReadBMP("Hercules.bmp");
+	imagenIN.ReadBMP("1.bmp");
 	//Para asegurar que la imagen esta en escala de grises
 	imagenIN.Grey();
 	//Se reindexan las filas y columnas para evitar tener valores negativos
@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
+	//Se reindexan las filas y columnas para evitar tener valores negativos
 	imagenOUT.Reindex(10000, 10000);
 
 	//Filas y columnas de la nueva matriz
@@ -206,13 +207,18 @@ int main(int argc, char **argv)
 
 					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
 						//Se calculan los coeficientes para cada pixel de alrededor del mapeado en funcion de la distancia entre ellos
-						f1 = ((i1 - xx) * (j1 - yy)) / ((i1 - ip) * (j1 - jp));
 
-						f2 = ((xx - ip) * (j1 - yy)) / ((i1 - ip) * (j1 - jp));
+						f1 = ((i1 - xx) * (j1 - yy));
+						//f1 = (1 - (xx - ip)) * (1 - (yy - jp));
 
-						f3 = ((i1 - xx) * (yy - jp)) / ((i1 - ip) * (j1 - jp));
+						f2 = ((xx - ip) * (j1 - yy));
+						//f2 = (1 - (i1 - xx)) * (1 - (yy - jp));
 
-						f4 = ((xx - ip) * (yy - jp)) / ((i1 - ip) * (j1 - jp));
+						f3 = ((i1 - xx) * (yy - jp));
+						//f3 = (1 - (xx - ip)) * (1 - (j1 - yy));
+
+						f4 = ((xx - ip) * (yy - jp));
+						//f4 = (1 - (i1 - xx)) * (1 - (j1 - yy));
 					
 						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
 					}
@@ -248,8 +254,8 @@ int main(int argc, char **argv)
 
 					a = xx - ip;			//Diferencia entre la fila del punto mepeado y su truncamiento
 					b = yy - jp;			//Diferencia entre la columna del punto mepeado y su truncamiento
-					valorPixel = 0;
 
+					valorPixel = 0;
 					/*
 						Solo se mapearan los puntos cuya mascara quede dentro de la imagen
 						A la hora de calcular la ponderacion de un pixel hay que hacer dos estimaciones, una con la distancia entre filas y otra con la distancia entre columnas
