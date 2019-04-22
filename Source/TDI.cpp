@@ -41,11 +41,11 @@ int main(int argc, char **argv)
 	//Se crea la imagen original
 	C_Image imagenIN;
 	//Se lee la imagen original
-	imagenIN.ReadBMP("1.bmp");
+	imagenIN.ReadBMP("Hercules.bmp");
 	//Para asegurar que la imagen esta en escala de grises
 	imagenIN.Grey();
 	//Se reindexan las filas y columnas para evitar tener valores negativos
-	imagenIN.Reindex(10000, 10000);
+	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
 	//Se reindexan las filas y columnas para evitar tener valores negativos
-	imagenOUT.Reindex(10000, 10000);
+	imagenOUT.Reindex(0, 0);
 
 	//Filas y columnas de la nueva matriz
 	long Np = imagenOUT.RowN();
@@ -208,17 +208,17 @@ int main(int argc, char **argv)
 					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
 						//Se calculan los coeficientes para cada pixel de alrededor del mapeado en funcion de la distancia entre ellos
 
-						f1 = ((i1 - xx) * (j1 - yy));
-						//f1 = (1 - (xx - ip)) * (1 - (yy - jp));
+						f1 = (1 - (xx - ip)) * (1 - (yy - jp));
+						//f1 = (i1 - xx) * (j1 - yy);
 
-						f2 = ((xx - ip) * (j1 - yy));
-						//f2 = (1 - (i1 - xx)) * (1 - (yy - jp));
+						f2 = (1 - (xx - ip)) * (1 - (j1 - yy));
+						//f2 = (i1 - xx) * (yy - jp);
+						
+						f3 = (1 - (i1 - xx)) * (1 - (yy - jp));
+						//f3 = (xx - ip) * (j1 - yy);
 
-						f3 = ((i1 - xx) * (yy - jp));
-						//f3 = (1 - (xx - ip)) * (1 - (j1 - yy));
-
-						f4 = ((xx - ip) * (yy - jp));
-						//f4 = (1 - (i1 - xx)) * (1 - (j1 - yy));
+						f4 = (1 - (i1 - xx)) * (1 - (j1 - yy));
+						//f4 = (xx - ip) * (yy - jp);
 					
 						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
 					}
