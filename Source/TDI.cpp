@@ -25,7 +25,6 @@ int main(int argc, char **argv)
 	//Indices de recorrido de bucles
 	long i, j;
 
-	/*
 	//Se pide al usuario que introduzca el nombre de la imagen a rotar
 	string name1;
 	char name[50];
@@ -35,12 +34,11 @@ int main(int argc, char **argv)
 		strcpy(name, name1.c_str());
 		strcat(name, ".bmp");
 	} while (!C_FileExists(name));
-	*/
 
 	//Se crea la imagen original
 	C_Image imagenIN;
 	//Se lee la imagen original
-	imagenIN.ReadBMP("TestImage.bmp");
+	imagenIN.ReadBMP(name);
 	//Para asegurar que la imagen esta en escala de grises
 	imagenIN.Grey();
 	//Se reindexan las filas y columnas
@@ -84,7 +82,6 @@ int main(int argc, char **argv)
 	long q2 = LONG_MIN;
 
 	/*
-		Se calculan los indices de fila y columna para la nueva matriz:
 		p1 -> primera fila
 		p2 -> ultima fila
 		q1 -> primera columna
