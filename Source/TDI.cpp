@@ -7,17 +7,17 @@
 
 #define PI 3.14159265
 
-//Devuelve el maximo entre el valor pasado como parametro y 0
+//Devuelve el maximo entre a (valor pasado como parametro) y 0
 double max(double a) {
 	if (a > 0) return a;
 	return 0;
 }
 
-//En funcion a la distancia respecto al punto rotado, calcula la ponderacion que se le asigna al pixel
+//En funcion a la distancia (k) respecto al punto rotado, calcula la ponderacion que se le asigna al pixel con una funcion de grado 3
 double calculoCoef(double k) {
-	double res;
-	res = (pow(max(k + 2), 3) + (-4 * pow(max(k + 1), 3)) + (6 * pow(max(k), 3)) + (-4 * pow(max(k - 1), 3))) / 6;
-	return res;
+	double resultado;
+	resultado = (pow(max(k + 2), 3) + (-4 * pow(max(k + 1), 3)) + (6 * pow(max(k), 3)) + (-4 * pow(max(k - 1), 3))) / 6;
+	return resultado;
 }
 
 int main(int argc, char **argv)
@@ -35,16 +35,15 @@ int main(int argc, char **argv)
 		strcpy(name, name1.c_str());
 		strcat(name, ".bmp");
 	} while (!C_FileExists(name));
-
 	*/
 
 	//Se crea la imagen original
 	C_Image imagenIN;
 	//Se lee la imagen original
-	imagenIN.ReadBMP("Hercules.bmp");
+	imagenIN.ReadBMP("TestImage.bmp");
 	//Para asegurar que la imagen esta en escala de grises
 	imagenIN.Grey();
-	//Se reindexan las filas y columnas para evitar tener valores negativos
+	//Se reindexan las filas y columnas
 	imagenIN.Reindex(0, 0);
 
 	//Se pide al usuario que introduzca el angulo a rotar
@@ -110,20 +109,20 @@ int main(int argc, char **argv)
 
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
-	//Se reindexan las filas y columnas para evitar tener valores negativos
+	//Se reindexan las filas y columnas
 	imagenOUT.Reindex(0, 0);
 
 	//Filas y columnas de la nueva matriz
-	long Np = imagenOUT.RowN();
-	long Mp = imagenOUT.ColN();
+	long Nr = imagenOUT.RowN();
+	long Mr = imagenOUT.ColN();
 
 	//Mitad de fila y columna de la nueva matriz
-	double Np2 = Np / 2;
-	double Mp2 = Mp / 2;
+	double Nr2 = Nr / 2;
+	double Mr2 = Mr / 2;
 
 	//Valores centrales en la nueva matriz (corrimientos acumulados)
-	double sxOUT = imagenOUT.FirstRow() + Np2;
-	double syOUT = imagenOUT.FirstCol() + Mp2;
+	double sxOUT = imagenOUT.FirstRow() + Nr2;
+	double syOUT = imagenOUT.FirstCol() + Mr2;
 	
 	//Se pide al usuario que seleccione el algoritmo a aplicar
 	printf("__________________________ ALGORITMOS __________________________\n");
@@ -205,7 +204,7 @@ int main(int argc, char **argv)
 					i1 = ip + 1;			//Fila inferior a ip
 					j1 = jp + 1;			//Columna derecha a jp
 
-					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow()) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol())) {
+					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow() + 1) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol() + 1)) {
 						//Se calculan los coeficientes para cada pixel de alrededor del mapeado en funcion de la distancia entre ellos
 
 						f1 = (1 - (xx - ip)) * (1 - (yy - jp));
@@ -220,7 +219,7 @@ int main(int argc, char **argv)
 						f4 = (1 - (i1 - xx)) * (1 - (j1 - yy));
 						//f4 = (xx - ip) * (yy - jp);
 					
-						imagenOUT(i, j) = f1 * imagenIN(ip, jp) + f2 * imagenIN(ip, j1) + f3 * imagenIN(i1, jp) + f4 * imagenIN(i1, j1);
+						imagenOUT(i, j) = f1 * imagenIN(ip, jp, true) + f2 * imagenIN(ip, j1, true) + f3 * imagenIN(i1, jp, true) + f4 * imagenIN(i1, j1, true);
 					}
 				}
 			}
@@ -261,42 +260,42 @@ int main(int argc, char **argv)
 						A la hora de calcular la ponderacion de un pixel hay que hacer dos estimaciones, una con la distancia entre filas y otra con la distancia entre columnas
 						(entre el punto a tratar con respecto al mapeado)
 					*/
-					if ((beforeip >= imagenIN.FirstRow()) && (ip2 <= imagenIN.LastRow()) && (beforejp >= imagenIN.FirstCol()) && (jp2 <= imagenIN.LastCol())) {
+					if ((beforeip >= imagenIN.FirstRow() - 1) && (ip2 <= imagenIN.LastRow() + 2) && (beforejp >= imagenIN.FirstCol() - 1) && (jp2 <= imagenIN.LastCol() + 2)) {
 						//Pixel (0,0)
-						valorPixel += (imagenIN(beforeip, beforejp)	* calculoCoef(-1 - a) * calculoCoef(b - (-1)));
+						valorPixel += (imagenIN(beforeip, beforejp, true)	* calculoCoef(-1 - a) * calculoCoef(b - (-1)));
 						//Pixel (1,0)
-						valorPixel += (imagenIN(ip, beforejp) * calculoCoef(0 - a) * calculoCoef(b - (-1)));
+						valorPixel += (imagenIN(ip, beforejp, true) * calculoCoef(0 - a) * calculoCoef(b - (-1)));
 						//Pixel (2,0)
-						valorPixel += (imagenIN(ip1, beforejp) * calculoCoef(1 - a) * calculoCoef(b - (-1)));
+						valorPixel += (imagenIN(ip1, beforejp, true) * calculoCoef(1 - a) * calculoCoef(b - (-1)));
 						//Pixel (3,0)
-						valorPixel += (imagenIN(ip2, beforejp) * calculoCoef(2 - a) * calculoCoef(b - (-1)));
+						valorPixel += (imagenIN(ip2, beforejp, true) * calculoCoef(2 - a) * calculoCoef(b - (-1)));
 
 						//Pixel (0,1)
-						valorPixel += (imagenIN(beforeip, jp) * calculoCoef(-1 - a) * calculoCoef(b));
+						valorPixel += (imagenIN(beforeip, jp, true) * calculoCoef(-1 - a) * calculoCoef(b));
 						//Pixel (1,1)
-						valorPixel += (imagenIN(ip, jp) * calculoCoef(0 - a) * calculoCoef(b));
+						valorPixel += (imagenIN(ip, jp, true) * calculoCoef(0 - a) * calculoCoef(b));
 						//Pixel (2,1)
-						valorPixel += (imagenIN(ip1, jp) * calculoCoef(1 - a) * calculoCoef(b));
+						valorPixel += (imagenIN(ip1, jp, true) * calculoCoef(1 - a) * calculoCoef(b));
 						//Pixel (3,1)
-						valorPixel += (imagenIN(ip2, jp) * calculoCoef(2 - a) * calculoCoef(b));
+						valorPixel += (imagenIN(ip2, jp, true) * calculoCoef(2 - a) * calculoCoef(b));
 
 						//Pixel (0,2)
-						valorPixel += (imagenIN(beforeip, jp1) * calculoCoef(-1 - a) * calculoCoef(b - 1));
+						valorPixel += (imagenIN(beforeip, jp1, true) * calculoCoef(-1 - a) * calculoCoef(b - 1));
 						//Pixel (1,2)
-						valorPixel += (imagenIN(ip, jp1) * calculoCoef(0 - a) * calculoCoef(b - 1));
+						valorPixel += (imagenIN(ip, jp1, true) * calculoCoef(0 - a) * calculoCoef(b - 1));
 						//Pixel (2,2)
-						valorPixel += (imagenIN(ip1, jp1) * calculoCoef(1 - a) * calculoCoef(b - 1));
+						valorPixel += (imagenIN(ip1, jp1, true) * calculoCoef(1 - a) * calculoCoef(b - 1));
 						//Pixel (3,2)
-						valorPixel += (imagenIN(ip2, jp1) * calculoCoef(2 - a) * calculoCoef(b - 1));
+						valorPixel += (imagenIN(ip2, jp1, true) * calculoCoef(2 - a) * calculoCoef(b - 1));
 
 						//Pixel (0,3)
-						valorPixel += (imagenIN(beforeip, jp2) * calculoCoef(-1 - a) * calculoCoef(b - 2));
+						valorPixel += (imagenIN(beforeip, jp2, true) * calculoCoef(-1 - a) * calculoCoef(b - 2));
 						//Pixel (1,3)
-						valorPixel += (imagenIN(ip, jp2) * calculoCoef(0 - a) * calculoCoef(b - 2));
+						valorPixel += (imagenIN(ip, jp2, true) * calculoCoef(0 - a) * calculoCoef(b - 2));
 						//Pixel (2,3)
-						valorPixel += (imagenIN(ip1, jp2) * calculoCoef(1 - a) * calculoCoef(b - 2));
+						valorPixel += (imagenIN(ip1, jp2, true) * calculoCoef(1 - a) * calculoCoef(b - 2));
 						//Pixel (3,3)
-						valorPixel += (imagenIN(ip2, jp2) * calculoCoef(2 - a) * calculoCoef(b - 2));
+						valorPixel += (imagenIN(ip2, jp2, true) * calculoCoef(2 - a) * calculoCoef(b - 2));
 
 						imagenOUT(i, j) = valorPixel;
 					}
