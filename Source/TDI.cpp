@@ -203,18 +203,13 @@ int main(int argc, char **argv)
 
 					if ((ip >= imagenIN.FirstRow()) && (i1 <= imagenIN.LastRow() + 1) && (jp >= imagenIN.FirstCol()) && (j1 <= imagenIN.LastCol() + 1)) {
 						//Se calculan los coeficientes para cada pixel de alrededor del mapeado en funcion de la distancia entre ellos
-
 						f1 = (1 - (xx - ip)) * (1 - (yy - jp));
-						//f1 = (i1 - xx) * (j1 - yy);
 
 						f2 = (1 - (xx - ip)) * (1 - (j1 - yy));
-						//f2 = (i1 - xx) * (yy - jp);
 						
 						f3 = (1 - (i1 - xx)) * (1 - (yy - jp));
-						//f3 = (xx - ip) * (j1 - yy);
 
 						f4 = (1 - (i1 - xx)) * (1 - (j1 - yy));
-						//f4 = (xx - ip) * (yy - jp);
 					
 						imagenOUT(i, j) = f1 * imagenIN(ip, jp, true) + f2 * imagenIN(ip, j1, true) + f3 * imagenIN(i1, jp, true) + f4 * imagenIN(i1, j1, true);
 					}
