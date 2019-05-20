@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	//Para asegurar que la imagen esta en escala de grises
 	imagenIN.Grey();
 	//Se reindexan las filas y columnas
-	imagenIN.Reindex(0, 0);
+	imagenIN.Reindex(1000, 1000);
 
 	//Se pide al usuario que introduzca el angulo a rotar
 	long angulo = -1;
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 	//Se crea la nueva imagen (matriz)
 	C_Image imagenOUT = C_Image(p1, p2, q1, q2, 127.0);
 	//Se reindexan las filas y columnas
-	imagenOUT.Reindex(0, 0);
+	imagenOUT.Reindex(1000, 1000);
 
 	//Filas y columnas de la nueva matriz
 	long Nr = imagenOUT.RowN();
